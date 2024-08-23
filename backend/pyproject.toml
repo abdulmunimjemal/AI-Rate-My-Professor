@@ -18,6 +18,7 @@ fastapi = {extras = ["all"], version = "^0.112.1"}
 websockets = "^13.0"
 uvicorn = "^0.30.6"
 starlette = "^0.38.2"
+langchainhub = "^0.1.21"
 
 
 [tool.poetry.group.dev.dependencies]
