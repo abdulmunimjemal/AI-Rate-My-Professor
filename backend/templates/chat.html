@@ -7,12 +7,12 @@
       name="viewport"
       content="width=device-width, initial-scale=1.0"
     />
-    <title>Chat Interface</title>
+    <title>Professor Chatbot</title>
     <style>
       body {
-        font-family: "Arial", sans-serif;
-        background-color: #1e1e2f;
-        color: #f0f0f0;
+        font-family: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
+        background-color: #0d0d0d;
+        color: #e0e0e0;
         display: flex;
         justify-content: center;
         align-items: center;
@@ -21,87 +21,133 @@
         padding: 0;
       }
       .container {
-        width: 90%;
-        max-width: 600px;
-        display: flex;
-        flex-direction: column;
-        gap: 20px;
-      }
-      .chat-container {
-        flex: 1;
-        height: 60vh;
-        background-color: #2c2c3e;
-        border-radius: 8px;
-        box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+        width: 100%;
+        max-width: 420px;
+        height: 620px; /* Fixed height for the container */
+        background-color: #1a1a1a;
+        border-radius: 15px;
+        box-shadow: 0 10px 30px rgba(0, 0, 0, 0.8);
         display: flex;
         flex-direction: column;
         overflow: hidden;
       }
       .chat-header {
-        background-color: #3a3f5c;
-        color: white;
-        padding: 10px;
-        text-align: center;
+        background-color: #2c2c2c;
+        padding: 20px;
         font-size: 20px;
         font-weight: bold;
+        text-align: center;
+        border-bottom: 1px solid #3a3a3a;
+        position: relative;
+      }
+      .status-indicator {
+        width: 12px;
+        height: 12px;
+        background-color: #d32f2f; /* Disconnected (red) */
+        border-radius: 50%;
+        display: inline-block;
+        margin-left: 10px;
+        vertical-align: middle;
+        transition: background-color 0.3s ease;
+      }
+      .connected {
+        background-color: #388e3c; /* Connected (green) */
       }
       .chat-messages {
         flex: 1;
         padding: 15px;
         overflow-y: auto;
-        list-style: none;
-        margin: 0;
+        background-color: #1a1a1a;
         display: flex;
         flex-direction: column;
+        gap: 15px;
+        scrollbar-width: thin;
+        scrollbar-color: #555 #1a1a1a;
+      }
+      .chat-messages::-webkit-scrollbar {
+        width: 8px;
+      }
+      .chat-messages::-webkit-scrollbar-thumb {
+        background-color: #555;
+        border-radius: 4px;
       }
       .chat-messages li {
-        margin-bottom: 10px;
-        padding: 8px 12px;
-        background-color: #3a3f5c;
-        border-radius: 5px;
-        max-width: 70%;
+        display: inline-block;
+        padding: 12px 20px;
+        border-radius: 18px;
+        max-width: 80%;
         word-wrap: break-word;
-        color: #f0f0f0;
+        font-size: 15px;
+        line-height: 1.4;
       }
       .chat-messages li.user-message {
         align-self: flex-end;
-        background-color: #007bff;
-        color: white;
+        background-color: #333;
+        color: #ffffff;
+        border-bottom-right-radius: 4px;
+      }
+      .chat-messages li.ai-message {
+        align-self: flex-start;
+        background-color: #2a2a2a;
+        color: #e0e0e0;
+        border-bottom-left-radius: 4px;
+      }
+      .chat-input-container {
+        background-color: #2c2c2c;
+        padding: 10px 15px;
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        border-top: 1px solid #3a3a3a;
       }
       .chat-input {
-        display: flex;
-        border-top: 1px solid #444;
-        background-color: #2c2c3e;
-      }
-      .chat-input input {
         flex: 1;
-        padding: 10px;
+        padding: 10px 15px;
+        background-color: #3a3a3a;
         border: none;
-        background-color: #444;
-        color: #f0f0f0;
+        border-radius: 25px;
+        color: #ffffff;
+        font-size: 15px;
         outline: none;
-        font-size: 16px;
-        border-radius: 0;
+        transition: background-color 0.3s ease;
       }
-      .chat-input button {
-        padding: 10px;
-        background-color: #007bff;
-        color: white;
+      .chat-input::placeholder {
+        color: #bbb;
+      }
+      .chat-input-button {
+        background-color: #555;
         border: none;
+        padding: 10px;
+        border-radius: 50%;
         cursor: pointer;
-        font-size: 16px;
+        transition: background-color 0.3s ease, transform 0.2s ease;
+        display: flex;
+        justify-content: center;
+        align-items: center;
       }
-      .chat-input button:hover {
-        background-color: #0056b3;
+      .chat-input-button:hover {
+        background-color: #777;
+        transform: scale(1.05);
+      }
+      .chat-input-button svg {
+        fill: #ffffff;
+        width: 18px;
+        height: 18px;
       }
       .logs-container {
-        height: 20vh;
-        background-color: #2c2c3e;
+        height: 150px; /* Fixed height for logs */
+        background-color: #1a1a1a;
         border-radius: 8px;
         box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
         padding: 10px;
         overflow-y: auto;
         color: #f0f0f0;
+        font-size: 14px;
+        display: none; /* Hidden by default */
+        margin-top: 10px;
+        margin: 30px;
+        width: 100%;
+        max-width: 16rem;
       }
       .log-message {
         font-size: 12px;
@@ -112,57 +158,131 @@
   </head>
   <body>
     <div class="container">
-      <div class="chat-container">
-        <div class="chat-header">WebSocket Chat</div>
-        <ul class="chat-messages" id="messages">
-          <!-- Messages will be dynamically added here -->
-        </ul>
-        <form class="chat-input" onsubmit="sendMessage(event)">
-          <input
-            type="text"
-            id="messageText"
-            placeholder="Type a message..."
-            autocomplete="off"
-          />
-          <button type="submit">Send</button>
-        </form>
+      <div class="chat-header">
+        Professor
+        <span id="statusIndicator" class="status-indicator"></span>
       </div>
+      <ul class="chat-messages" id="messages">
+        <!-- Initial message from AI -->
+        <li class="ai-message" id="initialMessage">
+          Hi there! I'm **Professor**, your AI assistant. How can I
+          help you today?
+        </li>
+      </ul>
+      <form
+        class="chat-input-container"
+        onsubmit="sendMessage(event)"
+      >
+        <input
+          type="text"
+          id="messageText"
+          class="chat-input"
+          placeholder="Type a message..."
+          autocomplete="off"
+        />
+        <button type="submit" class="chat-input-button">
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24">
+            <path d="M2,21 L23,12 L2,3 L2,10 L17,12 L2,14 L2,21 Z" />
+          </svg>
+        </button>
+      </form>
+    </div>
 
-      <div class="logs-container" id="logs">
-        <!-- Debug logs will be dynamically added here -->
-        <div class="log-message">[INFO] Chat initialized...</div>
-      </div>
+    <div class="logs-container" id="logs">
+      <!-- Debug logs will be dynamically added here -->
+      <div class="log-message">[INFO] Chat initialized...</div>
     </div>
 
     <script>
-      var ws = new WebSocket("ws://localhost:8000/chat");
+      var ws;
+      var statusIndicator =
+        document.getElementById("statusIndicator");
 
-      ws.onopen = function () {
-        addLog("[INFO] WebSocket connection established.");
-      };
+      function connectWebSocket() {
+        ws = new WebSocket("ws://localhost:8000/chat");
 
-      ws.onmessage = function (event) {
-        var messages = document.getElementById("messages");
-        var message = document.createElement("li");
-        var content = document.createTextNode(event.data);
+        ws.onopen = function () {
+          updateStatus(true);
+          addLog("[INFO] WebSocket connection established.");
+        };
+        var stream = false;
+        ws.onmessage = function (event) {
+          if (event.data === "<STREAM>") {
+            stream = true;
+            return;
+          }
+          var messages = document.getElementById("messages");
 
-        message.classList.add("user-message");
-        message.appendChild(content);
-        messages.appendChild(message);
+          // Handle the "<END>" token to signify end of streaming
+          if (event.data === "<END>") {
+            var streamingMessage = document.getElementById(
+              "streamingMessage"
+            );
 
-        // Scroll to the bottom of the messages
-        messages.scrollTop = messages.scrollHeight;
+            if (streamingMessage) {
+              streamingMessage.innerHTML = convertMarkdownToHtml(
+                streamingMessage.innerHTML
+              );
+              streamingMessage.removeAttribute("id");
+            }
+            addLog("[INFO] AI response streaming ended.");
+            stream = False;
+            return;
+          }
 
-        addLog("[RECEIVED] " + event.data);
-      };
+          var message;
+          // Check if the streaming has already started
+          if (document.getElementById("streamingMessage")) {
+            message = document.getElementById("streamingMessage");
+          } else {
+            // Create a new message element for streaming
+            message = document.createElement("li");
+            message.classList.add("ai-message");
+            message.setAttribute("id", "streamingMessage");
+            messages.appendChild(message);
+          }
 
-      ws.onerror = function (event) {
-        addLog("[ERROR] WebSocket error.");
-      };
+          // handle new lines
+          event.data = event.data.replace(/\\n/g, "<br>");
+          // handle tabs
+          event.data = event.data.replace(/\\t/g, "&emsp;");
 
-      ws.onclose = function () {
-        addLog("[INFO] WebSocket connection closed.");
-      };
+          if (stream) {
+            // Append the new data to the existing message
+            message.innerHTML += event.data;
+          } else {
+            // Convert Markdown to HTML using custom parser and set it as the inner HTML
+            message.innerHTML = convertMarkdownToHtml(event.data);
+            message.removeAttribute("id");
+          }
+          // Scroll to the bottom of the messages
+          messages.scrollTop = messages.scrollHeight;
+
+          addLog("[RECEIVED] " + event.data);
+        };
+
+        ws.onerror = function (event) {
+          addLog("[ERROR] WebSocket error.");
+          updateStatus(false);
+        };
+
+        ws.onclose = function () {
+          addLog("[INFO] WebSocket connection closed.");
+          updateStatus(false);
+          // Attempt to reconnect after a short delay
+          setTimeout(connectWebSocket, 3000);
+        };
+      }
+
+      function updateStatus(isConnected) {
+        if (isConnected) {
+          statusIndicator.classList.add("connected");
+          statusIndicator.title = "Connected";
+        } else {
+          statusIndicator.classList.remove("connected");
+          statusIndicator.title = "Disconnected";
+        }
+      }
 
       function sendMessage(event) {
         var input = document.getElementById("messageText");
@@ -195,6 +315,51 @@
         // Scroll to the bottom of the logs
         logsContainer.scrollTop = logsContainer.scrollHeight;
       }
+
+      // Show logs if ?dev is in the URL
+      if (window.location.search.includes("?dev")) {
+        document.getElementById("logs").style.display = "block";
+      }
+
+      // Custom Markdown parser to convert simple Markdown to HTML
+      function convertMarkdownToHtml(markdown) {
+        // Convert special characters
+        markdown = markdown.replace(/\\n/g, "<br>"); // Handle new lines
+        markdown = markdown.replace(/\\t/g, "&emsp;"); // Handle tabs
+
+        // Convert bold text
+        markdown = markdown.replace(
+          /\*\*(.*?)\*\*/g,
+          "<strong>$1</strong>"
+        );
+        // Convert italic text
+        markdown = markdown.replace(/\*(.*?)\*/g, "<em>$1</em>");
+        // Convert headers
+        markdown = markdown.replace(/^### (.*?)$/gm, "<h3>$1</h3>");
+        markdown = markdown.replace(/^## (.*?)$/gm, "<h2>$1</h2>");
+        markdown = markdown.replace(/^# (.*?)$/gm, "<h1>$1</h1>");
+        // Convert unordered lists
+        markdown = markdown.replace(
+          /^\* (.*?)$/gm,
+          "<ul><li>$1</li></ul>"
+        );
+        // Convert links
+        markdown = markdown.replace(
+          /\[(.*?)\]\((.*?)\)/g,
+          '<a href="$2" target="_blank">$1</a>'
+        );
+
+        return markdown;
+      }
+
+      // Convert initial AI message to HTML
+      document.getElementById("initialMessage").innerHTML =
+        convertMarkdownToHtml(
+          document.getElementById("initialMessage").textContent
+        );
+
+      // Initialize WebSocket connection
+      connectWebSocket();
     </script>
   </body>
 </html>
