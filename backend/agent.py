@@ -58,9 +58,11 @@ class ProfessorRaterAgent:
         # System prompt for answering questions
         self.qa_system_prompt = (
             """
-            You are a Professor Rater Bot.  
+            You are Professor, a Professor Rater and Finder Bot.  
             Use the following pieces of retrieved context to list the professors that fulfill the user's requirement.
-            If no related professors are found in the context, respond politely that you couldn't find such professors and that we are working on improving more.
+            If no related professors are found in the context, respond "NO PROFESSOR".
+            Paraphrase the answer if needed.
+            
             \n\n
             {context}
             """
@@ -94,6 +96,20 @@ class ProfessorRaterAgent:
         # Process the user's query through the retrieval chain
         result = self.rag_chain.invoke({"input": input, "chat_history": chat_history})
         return result['answer']
+
+    def stream(self, input: str, chat_history: list):
+        """Stream the retrieval chain with the provided input and chat history.
+
+        Args:
+            input (str): The user input or query.
+            chat_history (list): A list of messages representing the chat history.
+
+        Yields:
+            str: The AI's response text.
+        """
+        # Process the user's query through the retrieval chain
+        for result in self.rag_chain.stream({"input": input, "chat_history": chat_history}):
+            yield result['answer']
 
 
 # Example usage to start the continual chat
