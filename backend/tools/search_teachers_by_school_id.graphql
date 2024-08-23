@@ -1,0 +1,49 @@
+query NewSearchTeachersQuery(
+  $query: TeacherSearchQuery!
+  $count: Int
+) {
+  newSearch {
+    teachers(query: $query, first: $count) {
+      didFallback
+      edges {
+        cursor
+        node {
+          id
+          legacyId
+          firstName
+          lastName
+          department
+          departmentId
+          school {
+            legacyId
+            name
+            id
+          }
+          avgRating
+          numRatings
+          wouldTakeAgainPercentRounded
+          mandatoryAttendance {
+            yes
+            no
+            neither
+            total
+          }
+          takenForCredit {
+            yes
+            no
+            neither
+            total
+          }
+          ratingsDistribution {
+            r1
+            r2
+            r3
+            r4
+            r5
+            total
+          }
+        }
+      }
+    }
+  }
+}
