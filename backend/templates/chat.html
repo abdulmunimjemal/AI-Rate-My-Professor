@@ -1,0 +1,200 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+    <meta
+      name="viewport"
+      content="width=device-width, initial-scale=1.0"
+    />
+    <title>Chat Interface</title>
+    <style>
+      body {
+        font-family: "Arial", sans-serif;
+        background-color: #1e1e2f;
+        color: #f0f0f0;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        height: 100vh;
+        margin: 0;
+        padding: 0;
+      }
+      .container {
+        width: 90%;
+        max-width: 600px;
+        display: flex;
+        flex-direction: column;
+        gap: 20px;
+      }
+      .chat-container {
+        flex: 1;
+        height: 60vh;
+        background-color: #2c2c3e;
+        border-radius: 8px;
+        box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+        display: flex;
+        flex-direction: column;
+        overflow: hidden;
+      }
+      .chat-header {
+        background-color: #3a3f5c;
+        color: white;
+        padding: 10px;
+        text-align: center;
+        font-size: 20px;
+        font-weight: bold;
+      }
+      .chat-messages {
+        flex: 1;
+        padding: 15px;
+        overflow-y: auto;
+        list-style: none;
+        margin: 0;
+        display: flex;
+        flex-direction: column;
+      }
+      .chat-messages li {
+        margin-bottom: 10px;
+        padding: 8px 12px;
+        background-color: #3a3f5c;
+        border-radius: 5px;
+        max-width: 70%;
+        word-wrap: break-word;
+        color: #f0f0f0;
+      }
+      .chat-messages li.user-message {
+        align-self: flex-end;
+        background-color: #007bff;
+        color: white;
+      }
+      .chat-input {
+        display: flex;
+        border-top: 1px solid #444;
+        background-color: #2c2c3e;
+      }
+      .chat-input input {
+        flex: 1;
+        padding: 10px;
+        border: none;
+        background-color: #444;
+        color: #f0f0f0;
+        outline: none;
+        font-size: 16px;
+        border-radius: 0;
+      }
+      .chat-input button {
+        padding: 10px;
+        background-color: #007bff;
+        color: white;
+        border: none;
+        cursor: pointer;
+        font-size: 16px;
+      }
+      .chat-input button:hover {
+        background-color: #0056b3;
+      }
+      .logs-container {
+        height: 20vh;
+        background-color: #2c2c3e;
+        border-radius: 8px;
+        box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+        padding: 10px;
+        overflow-y: auto;
+        color: #f0f0f0;
+      }
+      .log-message {
+        font-size: 12px;
+        margin-bottom: 5px;
+        color: #f0f0f0;
+      }
+    </style>
+  </head>
+  <body>
+    <div class="container">
+      <div class="chat-container">
+        <div class="chat-header">WebSocket Chat</div>
+        <ul class="chat-messages" id="messages">
+          <!-- Messages will be dynamically added here -->
+        </ul>
+        <form class="chat-input" onsubmit="sendMessage(event)">
+          <input
+            type="text"
+            id="messageText"
+            placeholder="Type a message..."
+            autocomplete="off"
+          />
+          <button type="submit">Send</button>
+        </form>
+      </div>
+
+      <div class="logs-container" id="logs">
+        <!-- Debug logs will be dynamically added here -->
+        <div class="log-message">[INFO] Chat initialized...</div>
+      </div>
+    </div>
+
+    <script>
+      var ws = new WebSocket("ws://localhost:8000/chat");
+
+      ws.onopen = function () {
+        addLog("[INFO] WebSocket connection established.");
+      };
+
+      ws.onmessage = function (event) {
+        var messages = document.getElementById("messages");
+        var message = document.createElement("li");
+        var content = document.createTextNode(event.data);
+
+        message.classList.add("user-message");
+        message.appendChild(content);
+        messages.appendChild(message);
+
+        // Scroll to the bottom of the messages
+        messages.scrollTop = messages.scrollHeight;
+
+        addLog("[RECEIVED] " + event.data);
+      };
+
+      ws.onerror = function (event) {
+        addLog("[ERROR] WebSocket error.");
+      };
+
+      ws.onclose = function () {
+        addLog("[INFO] WebSocket connection closed.");
+      };
+
+      function sendMessage(event) {
+        var input = document.getElementById("messageText");
+        if (input.value.trim() !== "") {
+          var message = document.createElement("li");
+          message.textContent = input.value;
+          message.classList.add("user-message");
+
+          var messages = document.getElementById("messages");
+          messages.appendChild(message);
+
+          // Send the message to the server
+          ws.send(input.value);
+          addLog("[SENT] " + input.value);
+          input.value = "";
+
+          // Scroll to the bottom of the messages
+          messages.scrollTop = messages.scrollHeight;
+        }
+        event.preventDefault();
+      }
+
+      function addLog(logMessage) {
+        var logsContainer = document.getElementById("logs");
+        var logEntry = document.createElement("div");
+        logEntry.textContent = logMessage;
+        logEntry.className = "log-message";
+        logsContainer.appendChild(logEntry);
+
+        // Scroll to the bottom of the logs
+        logsContainer.scrollTop = logsContainer.scrollHeight;
+      }
+    </script>
+  </body>
+</html>
