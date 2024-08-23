@@ -12,10 +12,10 @@ class RAG:
         self._initialize()
 
     def _initialize(self):
-        if self.pinecone_index_name not in self.pinecone_client.list_indexes():
+        if self.pinecone_index_name not in self.pinecone_client.list_indexes().names():
             raise ValueError(f"Index {self.pinecone_index_name} not found in Pinecone. Please create the index first.")
 
-        index = self.pinecone_client.get_index(self.pinecone_index_name)
+        index = self.pinecone_client.Index(self.pinecone_index_name)
         self.vector_store = PineconeVectorStore(index, self.embedding)
         logger.info(f"Vector Store initialized with index {self.pinecone_index_name}")
         
@@ -25,3 +25,6 @@ class RAG:
             query, top_k=top_k
         )
         return results
+    
+    def get_retriever(self):
+        return self.vector_store.as_retriever()
