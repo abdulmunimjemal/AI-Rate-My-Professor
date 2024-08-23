@@ -1,0 +1,24 @@
+[tool.poetry]
+name = "ai rate my professor"
+version = "1.0.0"
+description = "Chatbot to rate your professor"
+authors = ["Abdulmunim <66489217+abdulmunimjemal@users.noreply.github.com>"]
+readme = "README.md"
+
+[tool.poetry.dependencies]
+python = ">=3.11,<3.13"
+pinecone-client = {extras = ["grpc"], version = "^5.0.1"}
+langchain = "^0.2.14"
+langchain-openai = "^0.1.22"
+langchain-community = "^0.2.12"
+python-dotenv = "^1.0.1"
+langchain-pinecone = "^0.1.3"
+pinecone-notebooks = "^0.1.1"
+
+
+[tool.poetry.group.dev.dependencies]
+ipykernel = "^6.29.5"
+
+[build-system]
+requires = ["poetry-core"]
+build-backend = "poetry.core.masonry.api"
