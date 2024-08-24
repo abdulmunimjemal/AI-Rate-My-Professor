@@ -43,6 +43,8 @@ async def get(request: Request):
     """
     Serve the chat interface and manage session state.
     """
+    ws_url = os.getenv("WEBSOCKET_URL", "ws://localhost:8000/chat")
+     
     session_id = request.cookies.get("session_id")
     
     if session_id and session_id in session_timestamps:
@@ -61,7 +63,7 @@ async def get(request: Request):
     session_timestamps[session_id] = time.time()
     chat_history[session_id] = []
 
-    response = templates.TemplateResponse("chat.html", {"request": request})
+    response = templates.TemplateResponse("chat.html", {"request": request, "ws_url": ws_url})
     response.set_cookie("session_id", session_id)
     return response
 
