@@ -30,9 +30,9 @@ Here are some screenshots of the application in action:
 
 - Extensive Tech Stack:
   - **AI Tools:** Langchain, Pinecone, OpenAI, Agentic RAG, Custom Tool Calling
-  - **Backend:** FastAPI, WebSockets
+  - **Backend:** FastAPI, WebSockets, Redis
   - **Frontend:** HTML, CSS, JavaScript
-  - **Dependency Management:** Poetry
+  - **Package Management:** Poetry
 
 #### Project Structure
 
