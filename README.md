@@ -14,6 +14,18 @@
 - **LLM Tool Call Integration**: Dynamic interaction with external tools and APIs.
 - **Agentic RAG**: Combines retrieval and generative models for accurate responses.
 
+#### Screenshots
+
+Here are some screenshots of the application in action:
+
+|                                                  Dark Mode                                                   |                                                  Light Mode                                                   |
+| :----------------------------------------------------------------------------------------------------------: | :-----------------------------------------------------------------------------------------------------------: |
+| ![Dark Mode](https://raw.githubusercontent.com/abdulmunimjemal/AI-Rate-My-Professor/main/screenshot/ss1.png) | ![Light Mode](https://raw.githubusercontent.com/abdulmunimjemal/AI-Rate-My-Professor/main/screenshot/ss4.png) |
+
+|                                             Professor Search Result                                              |                                            LLM Tool Calling Example                                             |
+| :--------------------------------------------------------------------------------------------------------------: | :-------------------------------------------------------------------------------------------------------------: |
+| ![Search Result](https://raw.githubusercontent.com/abdulmunimjemal/AI-Rate-My-Professor/main/screenshot/ss2.png) | ![Tool Calling](https://raw.githubusercontent.com/abdulmunimjemal/AI-Rate-My-Professor/main/screenshot/ss3.png) |
+
 #### Tech Stack
 
 - Extensive Tech Stack:
@@ -46,22 +58,6 @@
    ```bash
    poetry run python main.py
    ```
-
-#### Screenshots
-
-Here are some screenshots of the application in action:
-
-1. **Dark Mode Chat Interface**  
-   ![Dark Mode](https://github.com/abdulmunimjemal/AI-Rate-My-Professor/blob/main/screenshot/ss1.jpg)
-
-2. **Light Mode Chat Interface**  
-   ![Light Mode](https://github.com/abdulmunimjemal/AI-Rate-My-Professor/blob/main/screenshot/ss4.jpg)
-
-3. **Professor Search Result**  
-   ![Search Result](https://github.com/abdulmunimjemal/AI-Rate-My-Professor/blob/main/screenshot/ss2.jpg)
-
-4. **LLM Tool Calling Example**  
-   ![Tool Calling](https://github.com/abdulmunimjemal/AI-Rate-My-Professor/blob/main/screenshot/ss3.jpg)
 
 #### License
 
