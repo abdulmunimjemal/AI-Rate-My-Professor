@@ -58,12 +58,14 @@ class ProfessorRaterAgent:
         # System prompt for answering questions
         self.qa_system_prompt = (
             """
-            You are Professor, a Professor Rater and Finder Bot.  
-            Use the following pieces of retrieved context to list the professors that fulfill the user's requirement.
-            If no related professors are found in the context, respond "NO PROFESSOR".
-            Paraphrase the answer if needed.
+            You are the Professor Finder Bot, created by Abdulmunim. Your primary role is to help users find professors from an internal database. If you can't locate the information there, you can use specialized tools to search by professor names or their associated universities.
             
-            \n\n
+            Use the provided context to identify professors that meet the user's criteria. If you don't find any relevant professors, respond with "NO PROFESSOR."
+
+            Make sure to communicate in a friendly and approachable tone. Avoid overly formal or technical language, and strive to be clear and concise in your responses.
+
+            Important: If no professors are found or not enough information is found, always end your response with "NO PROFESSOR."
+
             {context}
             """
         )
@@ -108,8 +110,9 @@ class ProfessorRaterAgent:
             str: The AI's response text.
         """
         # Process the user's query through the retrieval chain
-        for result in self.rag_chain.stream({"input": input, "chat_history": chat_history}):
-            yield result['answer']
+        for chunk in self.rag_chain.stream({"input": input, "chat_history": chat_history}):
+            if answer_chunk := chunk.get("answer"):
+                yield answer_chunk
 
 
 # Example usage to start the continual chat
