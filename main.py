@@ -14,12 +14,15 @@ from starlette.middleware.sessions import SessionMiddleware
 
 from agent import ProfessorRaterAgent
 from langchain_core.messages import HumanMessage, AIMessage
+from tools.ratemyprofessor import run_tools
 
 load_dotenv()
 
 # CONSTANTS
 SECRET_KEY = os.getenv("SECRET_KEY", "S@MPL3")
 SESSION_TIMEOUT = int(os.getenv("SESSION_TIMEOUT", 60))
+BUFFER_SIZE = int(os.getenv("BUFFER_SIZE", "1024"))
+STREAM = True # os.getenv("STREAM", "False").lower() == "true"
 
 # App Setup
 app = FastAPI(
@@ -50,12 +53,13 @@ async def get(request: Request):
             session_id = None
     elif session_id and session_id not in session_timestamps:
         session_id = None
+
     if not session_id:
         session_id = str(uuid4())
     
     # Update session timestamps and chat history
     session_timestamps[session_id] = time.time()
-    chat_history.setdefault(session_id, [])
+    chat_history[session_id] = []
 
     response = templates.TemplateResponse("chat.html", {"request": request})
     response.set_cookie("session_id", session_id)
@@ -67,33 +71,61 @@ async def chat_endpoint(websocket: WebSocket):
     WebSocket endpoint for handling real-time chat messages.
     """
     await websocket.accept()
-    
+
     session_id = websocket.cookies.get("session_id")
     if not session_id:
         await websocket.close()
         return
     
+    if not session_id in chat_history: # Create new session if not found
+        chat_history[session_id] = []
+        session_timestamps[session_id] = time.time()
+        
     try:
         while True:
             human_message = await websocket.receive_text()
             ai_message = []
-            stream = False
-            if stream:
+            if STREAM:
                 await websocket.send_text("<STREAM>")
-                for chunk in agent.invoke(human_message, chat_history[session_id]):
-                    chunk = chunk.strip().replace("\n", "<br>").replace("\t", "&nbsp;&nbsp;&nbsp;&nbsp;").replace("  ", "&nbsp;&nbsp;")
-                    await websocket.send_text(chunk) 
-                    ai_message.append(chunk)
+                buffer = ""
+                for chunk in agent.invoke(human_message, chat_history[session_id]):                   
+                    buffer += chunk  # Add chunk to buffer
+                    if "NO PROFESSOR" in buffer:
+                        buffer = "I could not find anything relavant in my database.\
+                            I will try to make tool call to help you. Please wait for a moment."
+                        await websocket.send_text(buffer)
+                        await websocket.send_text("<END>")  # Send end of stream
+                        
+                        ai_response = run_tools(human_message, chat_history=chat_history[session_id]) # Call the tool
+                        await websocket.send_text("<STREAM>")  # Start new stream
+                        await websocket.send_text(ai_response)
+                        await websocket.send_text("<END>")  # Send end of stream
+                        ai_message.append(ai_response)
+                        buffer = ""
+                        break
+                    
+                    elif len(buffer) >= BUFFER_SIZE:  # Check if buffer size is exceeded                  
+                        await websocket.send_text(buffer)  # Send buffered data
+                        buffer = ""  # Clear the buffer
+                    
+                        ai_message.append(chunk)
                     # await asyncio.sleep(0.01)
+                
+                # Send any remaining data in the buffer
+                if buffer:
+                    await websocket.send_text(buffer)
+                
                 await websocket.send_text("<END>")
                 ai_message = "".join(ai_message)
-            else:
+            else: # No Streaming
                 ai_message = agent.invoke(human_message, chat_history[session_id])
-                ai_message = ai_message.strip().replace("\n", "<br>").replace("\t", "&nbsp;&nbsp;&nbsp;&nbsp;").replace("  ", "&nbsp;&nbsp;")
-                if "NO PROFESSOR." in ai_message:
-                    pass # pass it to OnlineAgent to Handle
+                if "NO PROFESSOR" in ai_message:
+                    buffer = "I could not find anything relavant in my databse.\
+                            I will try to make tool call to help you. Please wait for a moment."
+                    await websocket.send_text(buffer)
+                    ai_response = run_tools(human_message, chat_history=chat_history) # Call the toolnd(ai_response)
                 await websocket.send_text(ai_message)
-            
+
             chat_history[session_id].append(HumanMessage(human_message))
             chat_history[session_id].append(AIMessage(ai_message))
             session_timestamps[session_id] = time.time()

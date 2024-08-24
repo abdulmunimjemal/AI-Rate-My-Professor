@@ -271,6 +271,19 @@ agent_executor = AgentExecutor.from_agent_and_tools(
 )
 
 
+def run_tools(input: str, chat_history: list):
+    """
+    Run the tools on the input and chat history.
+
+    Args:
+        input (str): The input text.
+        chat_history (list): The chat history.
+
+    Returns:
+        dict: The output of the tools.
+    """
+    return agent_executor.invoke({"input": input, "chat_history": chat_history})["output"]
+
 if __name__ == "__main__":
     from langchain_core.messages import HumanMessage, AIMessage
     chat_history = []
